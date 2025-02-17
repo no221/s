@@ -102,38 +102,30 @@
             messageCountDiv.textContent = `Messages sent: ${messageCount}`;
         });
 
-        async function sendWebhook(webhookUrl, message) {
+        async function sendWebhook(webhookUrl, message ) {
             try {
-                const response = await fetch(webhookUrl , {
+                const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ content: message })
                 });
-                return response; // Return the response object
+                return response.ok; // Return true if the response is OK
             } catch (error) {
                 console.error("Error sending webhook:", error);
-                return null; // Return null if there was an error
+                return false; // Return false if there was an error
             }
         }
 
         async function spamMessages(webhookUrl, message, delay) {
             while (spamActive) {
                 const response = await sendWebhook(webhookUrl, message);
-                if (!response) {
-                    // Check for rate limit response
-                    const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
-                    const rateLimitResetAfter = response.headers.get('X-RateLimit-Reset-After');
-
-                    if (rateLimitRemaining === '0') {
-                        statusDiv.textContent = "Rate limit reached. Waiting...";
-                        await new Promise(resolve => setTimeout(resolve, rateLimitResetAfter * 1000)); // Wait until reset
-                        statusDiv.textContent = "Resuming sending...";
-                    }
-                } else {
+                if (response) {
                     messageCount++;
                     messageCountDiv.textContent = `Messages sent: ${messageCount}`;
+                } else {
+                    statusDiv.textContent = "Failed to send message. Rate limit may be reached.";
                 }
                 await new Promise(resolve => setTimeout(resolve, delay)); // Use the specified delay
             }
