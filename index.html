@@ -46,6 +46,7 @@
         const messageCountDiv = document.getElementById('messageCount');
 
         let messageCount = 0;
+        let spamActive = false; // Flag to control spam sending
 
         sendButton.addEventListener('click', async () => {
             const webhookUrl = webhookUrlInput.value;
@@ -70,7 +71,7 @@
 
         spamButton.addEventListener('click', async () => {
             const webhookUrl = webhookUrlInput.value;
- const message = messageInput.value;
+            const message = messageInput.value;
             const delay = parseInt(delayInput.value) || 100; // Default to 100ms if input is invalid
 
             if (!webhookUrl || !message) {
@@ -78,24 +79,25 @@
                 return;
             }
 
-            statusDiv.textContent = "Starting spam...";
-            await spamMessages(webhookUrl, message, delay);
+            if (spamActive) {
+                spamActive = false; // Stop the spam if it's already active
+                spamButton.textContent = "Start Spam";
+                statusDiv.textContent = "Spam stopped.";
+            } else {
+                spamActive = true; // Start the spam
+                spamButton.textContent = "Stop Spam";
+                statusDiv.textContent = "Starting spam...";
+                await spamMessages(webhookUrl, message, delay);
+            }
         });
 
-        deleteButton.addEventListener('click', async () => {
-            const webhookUrl = webhookUrlInput.value;
-
-            if (!webhookUrl) {
-                alert("Please enter the webhook URL to delete.");
-                return;
-            }
-
-            const response = await deleteWebhook(webhookUrl);
-            if (response) {
-                statusDiv.textContent = "Webhook deleted successfully!";
-            } else {
-                statusDiv.textContent = "Failed to delete webhook.";
-            }
+        deleteButton.addEventListener('click', () => {
+            webhookUrlInput.value = '';
+            messageInput.value = '';
+            delayInput.value = '';
+            statusDiv.textContent = "Webhook deleted.";
+            messageCount = 0;
+            messageCountDiv.textContent = `Messages sent: ${messageCount}`;
         });
 
         async function sendWebhook(webhookUrl, message) {
@@ -107,22 +109,31 @@
                     },
                     body: JSON.stringify({ content: message })
                 });
-                return response;
+                return response; // Return the response object
             } catch (error) {
                 console.error("Error sending webhook:", error);
-                return null;
+                return null; // Return null if there was an error
             }
         }
 
-        async function deleteWebhook(webhookUrl) {
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'DELETE'
-                });
-                return response.ok;
-            } catch (error) {
-                console.error("Error deleting webhook:", error);
-                return false;
+        async function spamMessages(webhookUrl, message , delay) {
+            while (spamActive) {
+                const response = await sendWebhook(webhookUrl, message);
+                if (!response) {
+                    // Check for rate limit response
+                    const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+                    const rateLimitResetAfter = response.headers.get('X-RateLimit-Reset-After');
+
+                    if (rateLimitRemaining === '0') {
+                        statusDiv.textContent = "Rate limit reached. Waiting...";
+                        await new Promise(resolve => setTimeout(resolve, rateLimitResetAfter * 1000)); // Wait until reset
+                        statusDiv.textContent = "Resuming sending...";
+                    }
+                } else {
+                    messageCount++;
+                    messageCountDiv.textContent = `Messages sent: ${messageCount}`;
+                }
+                await new Promise(resolve => setTimeout(resolve, delay)); // Use the specified delay
             }
         }
     </script>
