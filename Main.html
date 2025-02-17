@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Webhook Sender</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 10px;
+            width: 300px;
+        }
+        #status {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Discord Webhook Sender</h1>
+    <input type="text" id="webhookUrl" placeholder="Enter your Discord webhook URL" />
+    <textarea id="message" placeholder="Enter your message"></textarea>
+    <button id="sendButton">Send</button>
+    <button id="spamButton">Start Spam</button>
+    <div id="status"></div>
+
+    <script>
+        const sendButton = document.getElementById('sendButton');
+        const spamButton = document.getElementById('spamButton');
+        const webhookUrlInput = document.getElementById('webhookUrl');
+        const messageInput = document.getElementById('message');
+        const statusDiv = document.getElementById('status');
+
+        sendButton.addEventListener('click', async () => {
+            const webhookUrl = webhookUrlInput.value;
+            const message = messageInput.value;
+
+            if (!webhookUrl || !message) {
+                alert("Please enter both the webhook URL and the message.");
+                return;
+            }
+
+            const response = await sendWebhook(webhookUrl, message);
+            if (response) {
+                statusDiv.textContent = "Message sent successfully!";
+                sendButton.textContent = "Sent";
+            } else {
+                statusDiv.textContent = "Failed to send message. Limited.";
+                sendButton.textContent = "Limited";
+            }
+        });
+
+        spamButton.addEventListener('click', async () => {
+            const webhookUrl = webhookUrlInput.value;
+            const message = messageInput.value;
+
+            if (!webhookUrl || !message) {
+                alert("Please enter both the webhook URL and the message.");
+                return;
+            }
+
+            spamButton.disabled = true; // Disable the spam button while sending
+            spamButton.textContent = "Spamming...";
+
+            for (let i = 0; i < 10; i++) { // Change 10 to any number for how many times to send
+                const response = await sendWebhook(webhookUrl, message);
+                if (!response) {
+                    statusDiv.textContent = "Failed to send message. Limited.";
+                    spamButton.textContent = "Limited";
+                    break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second delay
+            }
+
+            spamButton.disabled = false; // Re-enable the spam button
+            spamButton.textContent = "Start Spam";
+        });
+
+        async function sendWebhook(webhookUrl, message) {
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content: message })
+                });
+
+                return response.ok; // Return true if the response is OK
+            } catch (error) {
+                console.error("Error sending webhook:", error);
+                return false; // Return false if there was an error
+            }
+        }
+    </script>
+
+</body>
+</html>
