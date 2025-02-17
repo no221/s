@@ -93,41 +93,59 @@
             }
         });
 
-        deleteButton.addEventListener('click', () => {
-            webhookUrlInput.value = '';
-            messageInput.value = '';
-            delayInput.value = '';
-            statusDiv.textContent = "Webhook deleted.";
-            messageCount = 0; // Reset message count
-            messageCountDiv.textContent = `Messages sent: ${messageCount}`;
+        deleteButton.addEventListener('click', async () => {
+            const webhookUrl = webhookUrlInput.value;
+
+            if (!webhookUrl) {
+                alert("Please enter the webhook URL to delete.");
+                return;
+            }
+
+            const response = await deleteWebhook(webhookUrl);
+            if (response) {
+                statusDiv.textContent = "Webhook deleted successfully!";
+                webhookUrlInput.value = ''; // Clear the input field
+            } else {
+                statusDiv.textContent = "Failed to delete webhook.";
+            }
         });
 
-        async function sendWebhook(webhookUrl, message ) {
+        async function sendWebhook(webhookUrl, message) {
             try {
                 const response = await fetch(webhookUrl, {
-                    method: 'POST',
+ method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ content: message })
+                    body: JSON.stringify({ content: message }),
                 });
-                return response.ok; // Return true if the response is OK
+                return response.ok;
             } catch (error) {
-                console.error("Error sending webhook:", error);
-                return false; // Return false if there was an error
+                console.error('Error sending webhook:', error);
+                return false;
             }
         }
 
         async function spamMessages(webhookUrl, message, delay) {
             while (spamActive) {
                 const response = await sendWebhook(webhookUrl, message);
-                if (response) {
-                    messageCount++;
-                    messageCountDiv.textContent = `Messages sent: ${messageCount}`;
-                } else {
-                    statusDiv.textContent = "Failed to send message. Rate limit may be reached.";
+                if (!response) {
+                    statusDiv.textContent = "Failed to send message during spam.";
+                    break;
                 }
-                await new Promise(resolve => setTimeout(resolve, delay)); // Use the specified delay
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+
+        async function deleteWebhook(webhookUrl) {
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'DELETE',
+                });
+                return response.ok;
+            } catch (error) {
+                console.error('Error deleting webhook:', error);
+                return false;
             }
         }
     </script>
