@@ -138,16 +138,29 @@
         }
 
         async function deleteWebhook(webhookUrl) {
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'DELETE',
-                });
-                return response.ok;
-            } catch (error) {
-                console.error('Error deleting webhook:', error);
-                return false;
-            }
+    try {
+        const response = await fetch(webhookUrl, {
+            method: 'DELETE',
+        });
+
+        if (response.status === 204) {
+            statusDiv.textContent = "Webhook deleted successfully!";
+            return true;
+        } else if (response.status === 404) {
+            statusDiv.textContent = "Error: Webhook not found!";
+        } else {
+            const errorText = await response.text();
+            statusDiv.textContent = `Failed to delete webhook. Error: ${errorText}`;
         }
+        
+        return false;
+    } catch (error) {
+        console.error('Error deleting webhook:', error);
+        statusDiv.textContent = "Error: Unable to delete webhook (Check console for details)";
+        return false;
+    }
+        }
+        
     </script>
 </body>
 </html>
