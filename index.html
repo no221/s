@@ -18,6 +18,9 @@
             margin-top: 10px;
             font-weight: bold;
         }
+        #messageCount {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -25,16 +28,24 @@
     <h1>Discord Webhook Sender</h1>
     <input type="text" id="webhookUrl" placeholder="Enter your Discord webhook URL" />
     <textarea id="message" placeholder="Enter your message"></textarea>
+    <input type="number" id="delay" placeholder="Enter delay in ms (e.g., 500)" />
     <button id="sendButton">Send</button>
     <button id="spamButton">Start Spam</button>
+    <button id="deleteButton">Delete Webhook</button>
     <div id="status"></div>
+    <div id="messageCount">Messages sent: 0</div>
 
     <script>
         const sendButton = document.getElementById('sendButton');
         const spamButton = document.getElementById('spamButton');
+        const deleteButton = document.getElementById('deleteButton');
         const webhookUrlInput = document.getElementById('webhookUrl');
         const messageInput = document.getElementById('message');
+        const delayInput = document.getElementById('delay');
         const statusDiv = document.getElementById('status');
+        const messageCountDiv = document.getElementById('messageCount');
+
+        let messageCount = 0;
 
         sendButton.addEventListener('click', async () => {
             const webhookUrl = webhookUrlInput.value;
@@ -47,17 +58,20 @@
 
             const response = await sendWebhook(webhookUrl, message);
             if (response) {
+                messageCount++;
                 statusDiv.textContent = "Message sent successfully!";
                 sendButton.textContent = "Sent";
             } else {
                 statusDiv.textContent = "Failed to send message. Limited.";
                 sendButton.textContent = "Limited";
             }
+            messageCountDiv.textContent = `Messages sent: ${messageCount}`;
         });
 
         spamButton.addEventListener('click', async () => {
             const webhookUrl = webhookUrlInput.value;
             const message = messageInput.value;
+            const delay = parseInt(delayInput.value) || 500; // Default to 500ms if not provided
 
             if (!webhookUrl || !message) {
                 alert("Please enter both the webhook URL and the message.");
@@ -74,11 +88,22 @@
                     spamButton.textContent = "Limited";
                     break;
                 }
-                await new Promise(resolve => setTimeout(resolve, 500)); // 0.5 second delay
+                messageCount++;
+                messageCountDiv.textContent = `Messages sent: ${messageCount}`;
+                await new Promise(resolve => setTimeout(resolve, delay)); // Use the specified delay
             }
 
             spamButton.disabled = false; // Re-enable the spam button
             spamButton.textContent = "Start Spam";
+        });
+
+        deleteButton.addEventListener('click', () => {
+            webhookUrlInput.value = '';
+            messageInput.value = '';
+            delayInput.value = '';
+            statusDiv.textContent = "Webhook deleted.";
+            messageCount = 0;
+            messageCountDiv.textContent = `Messages sent: ${messageCount}`;
         });
 
         async function sendWebhook(webhookUrl, message) {
