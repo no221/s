@@ -67,7 +67,7 @@ function obfuscate(source,VarName,WaterMark)
         local add_binary = function(number, s)
             local highest = 1
 
-            local topics = {
+            local topic = {
             "Deobfuscate?",
             "Hello World!",
             "IronBrew Fork? Nope.",
