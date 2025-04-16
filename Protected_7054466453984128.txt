@@ -12,10 +12,10 @@ function obfuscate(source, VarName, WaterMark)
     if typeof(WaterMark) == "string" and WaterMark ~= nil then
         WM = "    " .. tostring(WaterMark) .. " | Secured by GhostyDuckyy#7698"
     else
-        WM = "    WaterMark | Secured by GhostyDuckyy#7698"
+        WM = "    " .. "WaterMark" .. " | Secured by GhostyDuckyy#7698"
     end
 
-    WM = "--[[" .. "\n" .. WM .. "\n" .. "]]--" .. "\n\n"
+    WM = "--[[" .. "\n" .. tostring(WM) .. "\n" .. "]]--" .. "\n\n"
 
     local function random_(length)
         local letters = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"}
@@ -131,21 +131,11 @@ function obfuscate(source, VarName, WaterMark)
     local obfuscated = WM ..
                          troll_var .. "; " ..
                          Loadstring .. "; " ..
-                         fake_code(math.random(2,4), math.random(400,600)) ..
-                         dummy_code .. TableByte .. "; " ..
+                         fake_code(math.random(2,4), math.random(400,600)) .. dummy_code .. TableByte .. "; " ..
                          "local " .. Variable .. random_(math.random(15,20)) .. " = " .. func[1] .. "(" .. func[2] .. "); " ..
                          fake_code(math.random(2,4), math.random(math.floor(#source / 2), #source * 2))
 
-    -- Pengecekan jika panjang obfuscated lebih dari 1000 karakter, tulis ke file
-    if #obfuscated > 1000 then
-        -- Menggunakan writefile (pastikan environment Anda mendukung fungsi ini)
-        writefile("obfuscated_code.lua", obfuscated)
-        warn("Hasil obfuscation ditulis ke file: obfuscated_code.lua")
-    else
-        setclipboard(obfuscated)
-        warn("Hasil obfuscation disalin ke clipboard.")
-    end
-
+    setclipboard(obfuscated)
     warn("Done obfuscate in " .. tostring(tick() - ticks) .. " second")
     return
 end
