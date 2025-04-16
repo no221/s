@@ -209,7 +209,7 @@ function obfuscate(source, VarName, WaterMark)
             table.insert(parts, fake)
         end
         return table.concat(parts, " ")
-    een
+    end
     local dummy_code = ""
     for i = 1, math.random(3,6) do
         local dummyFunc = "local function " .. Variable .. random_(math.random(10,15)) .. "() " ..
