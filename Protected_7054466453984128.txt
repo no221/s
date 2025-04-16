@@ -1,339 +1,148 @@
 function obfuscate(source, VarName, WaterMark)
-        warn("Started obfuscate")
-        local Variable = VarName or "Taurus_"
-        local WM
+    warn("Started obfuscate")
+    local Variable = VarName or "Taurus_"
+    local WM
 
-        if source == nil then
-            source = [[print("Hello World!")]]
-        end
+    if source == nil then
+        source = [[print("Hello World!")]]
+    end
 
-        local ticks = tick()
+    local ticks = tick()
 
-        if typeof(WaterMark) == "string" and WaterMark ~= nil then
-            WM = "    "..tostring(WaterMark).." | Secured by GhostyDuckyy#7698"
+    if typeof(WaterMark) == "string" and WaterMark ~= nil then
+        WM = "    " .. tostring(WaterMark) .. " | Secured by GhostyDuckyy#7698"
+    else
+        WM = "    " .. "WaterMark" .. " | Secured by GhostyDuckyy#7698"
+    end
+
+    WM = "--[[" .. "\n" .. tostring(WM) .. "\n" .. "]]--" .. "\n\n"
+
+    local function random_(length)
+        local letters = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"}
+        local code
+        if math.random(1,2) == 1 then
+            code = letters[math.random(1, #letters)]
         else
-            WM = "    ".."WaterMark".." | Secured by GhostyDuckyy#7698"
+            code = string.upper(letters[math.random(1, #letters)])
         end
-
-        WM = "--[[".."\n".. tostring(WM) .."\n".."]]--".."\n\n"
-
-        local random_ = function(length)
-            local letters = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"}
-            local code
-
+        for i = 1, tonumber(length) do
             if math.random(1,2) == 1 then
-                code = ""..letters[math.random(1,26)]
+                local char = letters[math.random(1, #letters)]
+                if math.random(1,2) == 1 then
+                    code = code .. string.upper(char)
+                else
+                    code = code .. char
+                end
             else
-                code = ""..tostring(letters[math.random(1,26)]):upper()
+                code = code .. tostring(math.random(0,9))
             end
+        end
+        return code
+    end
 
-            for i = 1, tonumber(length) do
-                if math.random(1,2) == 1 then -- letters
-                    local get_letters = letters[math.random(1,26)]
-                    if math.random(1,2) == 1 then
-                        code = code..tostring(get_letters):upper()
-                    else
-                        code = code..tostring(get_letters)
-                    end
-                else -- number
-                    code = code..tostring(math.random(0,9))
-                end
+    local function StringToBinary(str)
+        local result = {}
+        for i = 1, #str do
+            local byte = str:byte(i)
+            local bin = ""
+            while byte > 0 do
+                bin = tostring(byte % 2) .. bin
+                byte = math.floor(byte / 2)
             end
-            return tostring(code)
+            table.insert(result, string.rep("0", 8 - #bin) .. bin)
         end
+        return table.concat(result, " ")
+    end
 
-        local StringToBinary = function(String)
-            local BinaryString = {}
+    local function add_binary(number, s)
+        local topics = {
+            "Deobfuscate?",
+            "Hello World!",
+            "IronBrew Fork? Nope.",
+            "PSU Fork? Nope.",
+            "Touch some grass",
+            "New update when?",
+            "GhostyDuckyy",
+            "Free obfuscator!",
+            "E",
+            random_(math.random(50,150)),
+        }
+        for i = 1, tonumber(number) do
+            local topic = topics[math.random(1, #topics)]
+            local dummy = "local " .. Variable .. random_(math.random(10,12)) .. " = \"" .. StringToBinary(topic) .. "\"; "
+            s = s .. dummy
+        end
+        return s
+    end
 
-            for i, Character in ipairs(String:split'') do
-                local Binary = ""
-                local Byte = Character:byte()
-                while Byte > 0 do
-                    Binary = tostring(Byte % 2) .. Binary
-                    Byte = math.modf(Byte / 2)
-                end
-                table.insert(BinaryString, string.format("%.8d", Binary))
+    local Random_Variable = {
+        TableByte = random_(math.random(15,20)),
+        Table_concat = random_(math.random(15,20)),
+        Loadstring = random_(math.random(15,20)),
+        DummyFunc = random_(math.random(15,20)), -- variabel dummy tambahan
+        UnusedVar = random_(math.random(15,20)),   -- variabel yang tidak digunakan
+    }
+
+    local troll_func = "function() " .. add_binary(math.random(30,50), "") .. " end"
+    local troll_var = "local " .. Variable .. random_(math.random(15,20)) .. " = " .. troll_func
+
+    local SourceByte = ""
+    for i = 1, #source do
+        SourceByte = SourceByte .. "\"\\" .. string.byte(source, i) .. "\", "
+    end
+    local TableByte = "local " .. Variable .. Random_Variable.TableByte .. " = {" .. SourceByte .. "}"
+
+    local Loadstring = "local " .. Variable .. Random_Variable.Loadstring .. " = loadstring(table.concat({\"\\114\", \"\\101\", \"\\116\", \"\\117\", \"\\114\", \"\\110\", \" \\102\", \"\\117\", \"\\110\", \"\\99\", \"\\116\", \"\\105\", \"\\111\", \"\\110\", \"\\32\", \"\\98\", \"\\121\", \"\\116\", \"\\101\"}))()"
+    local func = {
+        Variable .. Random_Variable.Loadstring,
+        Variable .. Random_Variable.TableByte,
+    }
+
+    local function fake_code(number, r)
+        local parts = {}
+        for i = 1, tonumber(number) do
+            local create_Var = Variable .. random_(math.random(15,20))
+            local randStr = ""
+            if r then
+                randStr = "return " .. random_(tonumber(r))
+            else
+                randStr = "return " .. random_(math.floor(#source / 2))
             end
-
-            return table.concat(BinaryString, " ")
-        end
-
-        -- Create super messy binary string generator
-        local add_binary = function(number, s)
-            local highest = 1
-
-            local topic = {
-                "Deobfuscate?",
-                "Hello World!",
-                "IronBrew Fork? Nope.",
-                "PSU Fork? Nope.",
-                "Touch some grass",
-                "New update when?",
-                "GhostyDuckyy",
-                "Free obfuscator!",
-                "E",
-                random_(math.random(50,150)),
-            }
-
-            for i,v in pairs(topic) do
-                if i > highest then
-                    highest = i
-                end
+            local byteStr = ""
+            for j = 1, #randStr do
+                byteStr = byteStr .. "\"\\" .. string.byte(randStr, j) .. "\", "
             end
-            
-            -- Generate extremely messy binary strings
-            for i = 1, tonumber(number) do
-                local messiness = math.random(1, 5)
-                local str = ""
-                
-                if messiness == 1 then
-                    -- Standard messy format, but with random spaces
-                    local spaces = ""
-                    for j = 1, math.random(0, 10) do spaces = spaces.." " end
-                    str = spaces..[[local]]..spaces..Variable..tostring(random_(math.random(10,12)))..spaces..[[=]]..spaces..'"'..StringToBinary(tostring(topic[math.random(1, tonumber(highest))]))..'"'..spaces.."; "
-                elseif messiness == 2 then
-                    -- Extremely ugly spacing and formatting
-                    str = [[ local  ]]..Variable..tostring(random_(math.random(10,12)))..[[ =   ]]..'"'..StringToBinary(tostring(topic[math.random(1, tonumber(highest))]))..'"'..[[  ;]]
-                elseif messiness == 3 then
-                    -- Line breaks in random places
-                    local line_break = math.random(1, 3)
-                    if line_break == 1 then
-                        str = [[local ]]..Variable..tostring(random_(math.random(10,12)))..
-                        [[ 
-                        = ]]..'"'..StringToBinary(tostring(topic[math.random(1, tonumber(highest))]))..'"'.."; "
-                    elseif line_break == 2 then
-                        str = [[local ]]..Variable..tostring(random_(math.random(10,12)))..[[ = 
-                        ]]..'"'..StringToBinary(tostring(topic[math.random(1, tonumber(highest))]))..'"'.."; "
-                    else
-                        str = [[local ]]..Variable..tostring(random_(math.random(10,12)))..[[ = ]]..'"'..StringToBinary(tostring(topic[math.random(1, tonumber(highest))]))..
-                        [["
-                        ; ]]
-                    end
-                elseif messiness == 4 then
-                    -- Multiple comments
-                    str = [[local ]]..Variable..tostring(random_(math.random(10,12)))..[[ = ]]..'"'..StringToBinary(tostring(topic[math.random(1, tonumber(highest))]))..'"'.."; "..
-                    [[ --comment]] .. [[
-                    --another comment
-                    ]]
-                else
-                    -- Nested comment blocks with chaotic formatting
-                    str = [[--[[ random comment ]]
-                        local ]]..Variable..tostring(random_(math.random(10,12)))..[[ = --[[ inline comment ]]
-                        ]]..'"'..StringToBinary(tostring(topic[math.random(1, tonumber(highest))]))..'"'.."; --[[ another comment ]]"
-                end
-                s = s..str
-            end
-
-            return tostring(s)
+            local fake = "local " .. create_Var .. " = {" .. byteStr .. "}; local " .. create_Var .. " = " .. func[1] .. "(" .. create_Var .. "); "
+            table.insert(parts, fake)
         end
+        return table.concat(parts, " ")
+    end
 
-        -- Create more chaotic variable names
-        local Random_Variable = {
-            TableByte = random_(math.random(15,20))..(math.random(1,3)==1 and "_" or "")..(math.random(1,3)==1 and random_(3) or ""),
-            Table_concat = random_(math.random(15,20))..(math.random(1,3)==1 and "_" or "")..(math.random(1,3)==1 and random_(3) or ""),
-            Loadstring = random_(math.random(15,20))..(math.random(1,3)==1 and "_" or "")..(math.random(1,3)==1 and random_(3) or ""),
-        }
+    -- Bagian dummy tambahan untuk menambah noise (kode tidak terpakai)
+    local dummy_code = ""
+    for i = 1, math.random(3,6) do
+        local dummyFunc = "local function " .. Variable .. random_(math.random(10,15)) .. "() " ..
+                          "local " .. Variable .. random_(math.random(5)) .. " = " .. random_(math.random(10,20)) .. "; " ..
+                          "if false then " .. random_(math.random(5,10)) .. " end " ..
+                          "end; "
+        dummy_code = dummy_code .. dummyFunc
+    end
 
-        -- Generate highly messy troll function
-        local troll_func_patterns = {
-            -- Standard but messy
-            [[function()]]..add_binary(math.random(30,50), "")..[[ end]],
-            
-            -- With random line breaks and spaces
-            [[function(  )
-                ]]..add_binary(math.random(20,30), "")..[[ 
-                
-                return   ]]..(math.random(1,2)==1 and "nil" or "true")..[[ end]],
-            
-            -- Extremely messy with comments
-            [[function(   )--[[ nothing ]]
-            ]]..add_binary(math.random(10,20), "")..[[ 
-            if     true   then   ]]..add_binary(math.random(10,20), "")..[[ else ]]..add_binary(math.random(5,10), "")..[[ end
-                return    false end]],
-                
-            -- Messy with random tabs
-            [[function(]]..random_(math.random(3,5))..[[)
-                ]]..string.rep("\t", math.random(1,5))..add_binary(math.random(10,20), "")..[[ 
-                ]]..string.rep("\t", math.random(1,5))..[[return ]]..random_(math.random(5,10))..[[
-            end]]
-        }
-        
-        local troll_func = troll_func_patterns[math.random(1, #troll_func_patterns)]
-        
-        -- Generate extremely messy troll variables
-        local troll_var_patterns = {
-            -- Standard but messy
-            [[local ]]..Variable..tostring(random_(math.random(15,20)))..[[ = ]]..troll_func,
-            
-            -- With random spaces and formatting
-            [[local  ]]..Variable..tostring(random_(math.random(15,20)))..[[  =  ]]..troll_func,
-            
-            -- With comments and line breaks
-            [[local]]..string.rep(" ", math.random(1,5))..Variable..tostring(random_(math.random(15,20)))..[[
-            -- Random comment
-            = 
-            ]]..troll_func,
-            
-            -- Extremely ugly spacing
-            [[local   ]]..Variable..tostring(random_(math.random(15,20)))..[[=]]..troll_func
-        }
-        
-        local troll_var = troll_var_patterns[math.random(1, #troll_var_patterns)]
+    local obfuscated = WM ..
+                         troll_var .. "; " ..
+                         Loadstring .. "; " ..
+                         fake_code(math.random(2,4), math.random(400,600)) .. dummy_code .. TableByte .. "; " ..
+                         "local " .. Variable .. random_(math.random(15,20)) .. " = " .. func[1] .. "(" .. func[2] .. "); " ..
+                         fake_code(math.random(2,4), math.random(math.floor(#source / 2), #source * 2))
 
-        -- Generate messy source byte representation
-        local SourceByte = ""
-        local byte_formats = {
-            function(byte) return '"\\'..byte..'", ' end,                              -- Standard
-            function(byte) return '"'..byte..'", ' end,                               -- Raw number
-            function(byte) return byte.." , " end,                                   -- Just number with space
-            function(byte) return '"\\'..(math.random(1,2)==1 and byte or byte+0)..'",\n' end, -- With line break
-            function(byte) return '"\\'..(math.random(1,2)==1 and byte or byte+0)..'",'..(math.random(1,4)==1 and "--comment" or "") end -- With comment
-        }
-        
-        for i = 1,string.len(source) do 
-            local format = byte_formats[math.random(1, #byte_formats)]
-            SourceByte = SourceByte..format(string.byte(source, i))
-        end
-        
-        -- Generate extremely messy table byte definition
-        local TableByte = ""
-        local tableByte_patterns = {
-            -- Standard but messy
-            [[local ]]..Variable..tostring(Random_Variable.TableByte)..[[ = {]]..SourceByte..[[}]],
-            
-            -- With random spaces and line breaks
-            [[local  ]]..Variable..tostring(Random_Variable.TableByte)..[[  = 
-            {]]..SourceByte..[[
-            }]],
-            
-            -- Super ugly
-            [[local]]..string.rep(" ", math.random(1,10))..Variable..tostring(Random_Variable.TableByte)..[[=   {]]..SourceByte..[[}]],
-            
-            -- With comments
-            [[--[[ table bytes ]]
-            local ]]..Variable..tostring(Random_Variable.TableByte)..[[ = {--[[start]]
-                ]]..SourceByte..[[
-            }--[[end]]]]
-        }
-        
-        TableByte = tableByte_patterns[math.random(1, #tableByte_patterns)]
-        
-        -- Generate messy loadstring
-        local Loadstring = [[local ]]..Variable..tostring(Random_Variable.Loadstring)..[[ = loadstring(table.concat({"\114", "\101", "\116", "\117", "\114", "\110", "\32", "\102", "\117", "\110", "\99", "\116", "\105", "\111", "\110", "\40", "\98", "\121", "\116", "\101", "\41", "\10", "\32", "\32", "\32", "\32", "\105", "\102", "\32", "\116", "\121", "\112", "\101", "\111", "\102", "\40", "\98", "\121", "\116", "\101", "\41", "\32", "\61", "\61", "\32", "\34", "\116", "\97", "\98", "\108", "\101", "\34", "\32", "\116", "\104", "\101", "\110", "\10", "\32", "\32", "\32", "\32", "\32", "\32", "\32", "\32", "\108", "\111", "\97", "\100", "\115", "\116", "\114", "\105", "\110", "\103", "\40", "\116", "\97", "\98", "\108", "\101", "\46", "\99", "\111", "\110", "\99", "\97", "\116", "\40", "\98", "\121", "\116", "\101", "\41", "\41", "\40", "\41", "\10", "\32", "\32", "\32", "\32", "\101", "\108", "\115", "\101", "\10", "\32", "\32", "\32", "\32", "\32", "\32", "\32", "\32", "\98", "\121", "\116", "\101", "\32", "\61", "\32", "\123", "\98", "\121", "\116", "\101", "\125", "\10", "\32", "\32", "\32", "\32", "\32", "\32", "\32", "\32", "\108", "\111", "\97", "\100", "\115", "\116", "\114", "\105", "\110", "\103", "\40", "\116", "\97", "\98", "\108", "\101", "\46", "\99", "\111", "\110", "\99", "\97", "\116", "\40", "\98", "\121", "\116", "\101", "\41", "\41", "\40", "\41", "\10", "\32", "\32", "\32", "\32", "\101", "\110", "\100", "\10", "\101", "\110", "\100", "\10",}))()]]
-        
-        local func = {
-            [1] = Variable..tostring(Random_Variable.Loadstring),
-            [2] = Variable..tostring(Random_Variable.TableByte),
-        }
-
-        -- Generate extremely messy fake code
-        local fake_code = function(number, r)
-            local t = {}
-            
-            for i = 1, tonumber(number) do
-                local messiness = math.random(1, 5)
-                local create_Var = Variable..tostring(random_(math.random(15,20)))
-                local random
-
-                if r ~= nil then
-                    random = "return "..tostring(random_(tonumber(r)))
-                else
-                    random = "return "..tostring(random_(math.clamp(1000, string.len(source) / 2, string.len(source))))
-                end
-
-                local byte = ""
-                for x = 1, string.len(random) do 
-                    -- Randomly choose between standard format and extremely messy format
-                    if math.random(1, 4) == 1 then
-                        byte = byte..'"\\'..string.byte(random, x)..'", '
-                    elseif math.random(1, 3) == 1 then
-                        byte = byte..'\n"\\'..string.byte(random, x)..'", '
-                    elseif math.random(1, 2) == 1 then
-                        byte = byte..'    "\\'..string.byte(random, x)..'", '
-                    else
-                        byte = byte..'"\\'..string.byte(random, x)..'",--[=['..random_(math.random(5,10))..']=] '
-                    end
-                end
-                
-                local fake = ""
-                
-                if messiness == 1 then
-                    -- Standard with random messy spacing
-                    fake = [[local ]]..create_Var..[[ = {]]..byte..[[}; ]]..[[local ]]..create_Var.." = "..func[1]..[[(]]..create_Var..[[); ]]
-                elseif messiness == 2 then
-                    -- With random line breaks
-                    fake = [[local ]]..create_Var..[[ = 
-                    {]]..byte..[[}; 
-                    local ]]..create_Var.." = "..func[1]..[[(]]..create_Var..[[); ]]
-                elseif messiness == 3 then
-                    -- Super ugly spacing
-                    fake = [[local  ]]..create_Var..[[={]]..byte..[[};local ]]..create_Var.."="..func[1]..[[(]]..create_Var..[[);]]
-                elseif messiness == 4 then
-                    -- With cryptic comments
-                    fake = [[--[=[]]..random_(math.random(5,10))..[[]=]
-                    local ]]..create_Var..[[ = {]]..byte..[[}; ]]..[[local ]]..create_Var.." = "..func[1]..[[(]]..create_Var..[[); --]]
-                else
-                    -- Complete chaos
-                    fake = [[
-                    --comment]]..math.random(1,999)..[[
-                    local 
-                    ]]..create_Var..[[ = 
-                    {]]..byte..[[};
-                     local ]]..create_Var..[[ 
-                     = ]]..func[1]..
-                    [[(]]..create_Var..[[);
-                    ]]
-                end
-                
-                table.insert(t, fake)
-            end
-
-            return unpack(t)
-        end
-
-        -- Add random "garbage" separators between code sections
-        local separators = {
-            "; ",
-            ";\n",
-            ";\n\n",
-            ";--[[" .. random_(math.random(5,10)) .. "]];",
-            ";\n--" .. random_(math.random(5,10)) .. "\n",
-            ";" .. string.rep(" ", math.random(1,20))
-        }
-        
-        local getSeparator = function()
-            return separators[math.random(1, #separators)]
-        end
-
-        -- Generate more dummy code than original
-        local final_execution = [[local ]]..Variable..tostring(random_(math.random(15,20))).." = "..func[1].."("..func[2]..")"
-        
-        local execution_patterns = {
-            final_execution,
-            "-- Execute main\n" .. final_execution,
-            "-- Start\n\n" .. final_execution .. "\n--End",
-            final_execution .. " --Main execution" 
-        }
-        
-        local messy_execution = execution_patterns[math.random(1, #execution_patterns)]
-        
-        -- Build final obfuscated code with random separators and chaotic structure
-        local obfuscated = WM..
-                          troll_var..getSeparator()..
-                          Loadstring..getSeparator()..
-                          fake_code(math.random(6,12), math.random(400,800))..
-                          getSeparator()..TableByte..
-                          getSeparator()..messy_execution..
-                          getSeparator()..fake_code(math.random(6,12), math.random(string.len(source) / 2, string.len(source) * 4))
-        
-        setclipboard(obfuscated)
-        warn("Done obfuscate in "..tostring(tick() - ticks).." second")
-    return obfuscated
+    setclipboard(obfuscated)
+    warn("Done obfuscate in " .. tostring(tick() - ticks) .. " second")
+    return
 end
 
 --// Module
-return function(source,CustomVarName,WaterMark)
+return function(source, CustomVarName, WaterMark)
     task.spawn(function()
-        obfuscate(source,CustomVarName,WaterMark)
+        obfuscate(source, CustomVarName, WaterMark)
     end)
 end
