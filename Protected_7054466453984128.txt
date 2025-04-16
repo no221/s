@@ -10,9 +10,9 @@ function obfuscate(source, VarName, WaterMark)
     local ticks = tick()
 
     if typeof(WaterMark) == "string" and WaterMark ~= nil then
-        WM = "    " .. tostring(WaterMark) .. " | Secured by ???"
+        WM = "    " .. tostring(WaterMark) .. " | Secured by GhostyDuckyy#7698"
     else
-        WM = "    WaterMark | Secured by ???"
+        WM = "    WaterMark | Secured by GhostyDuckyy#7698"
     end
 
     WM = "--[[" .. "\n" .. WM .. "\n" .. "]]--" .. "\n\n"
@@ -64,100 +64,7 @@ function obfuscate(source, VarName, WaterMark)
             "New update when?",
             "GhostyDuckyy",
             "Free obfuscator!",
-            "Reverse engineering?",
-            "25ms",
-            "Nah",
-            "How",
             "E",
-            "Totally not sus",
-            "Nice try, lol",
-            "Try harder!",
-            "Obfuscation magic",
-            "Decompiled? Cope.",
-            "Eval gang",
-            "Where's the sauce?",
-            "404: Logic not found",
-            "You wish",
-            "Lua wizardry",
-            "Bitecode moment",
-            "Good luck, bro",
-            "Why tho?",
-            "Console.log('cry')",
-            "Skill issue",
-            "Guess again",
-            "Keep dreaming",
-            "U wot m8",
-            "Smells like paste",
-            "Stack overflowed",
-            "Oopsie",
-            "Catch me if u can",
-            "Alt+F4 for hints",
-            "Trust the process",
-            "Glitch in the matrix",
-            "Not even close",
-            "Encrypted by ducks",
-            "Duck obfuscation",
-            "Bytecode is love",
-            "Obfuscate. Dominate.",
-            "Mother of all forks",
-            "U mad?",
-            "Insert witty phrase",
-            "Ctrl+C, Ctrl+V pro",
-            "Scrambled eggs logic",
-            "Certified hood classic",
-            "Did you try praying?",
-            "lolnope",
-            "ChatGPT said no",
-            "False sense of hope",
-            "Lurking variables",
-            "This ain't it chief",
-            "Read the docs maybe?",
-            "Tea, not coffee",
-            "Too deep",
-            "Wow, so original",
-	"Keep trying, Sherlock",
-	"10/10 effort, 0/10 results",
-	"Almost had it… not really",
-	"Must be magic",
-	"Yup, totally readable",
-	"Oops, all encryption!",
-	"Definitely not a waste of time",
-	"Still easier than your code",
-	"Should've used ChatGPT",
-	"404: Your skills not found",
-	"Because why not?",
-	"U solved it? In your dreams",
-	"Obfuscated to perfection",
-	"Lua? More like LUL",
-	"Certified brain damage",
-	"Trust me bro, it works",
-	"Nice guess, wrong again",
-	"Please stop crying",
-	"Source code sold separately",
-	"Just decrypt it, right?",
-	"You're in too deep",
-	"Your debugger left the chat",
-	"This ain't JavaScript",
-	"You and what brain?",
-	"Congratulations, it's a mess!",
-	"Skill check failed",
-	"Try StackOverflow maybe?",
-	"It's not a bug, it's a feature",
-	"Debug harder, not smarter",
-	"Did you mean 'give up'?",
-	"Yes, it's spaghetti",
-	"Totally readable, right?",
-	"Best viewed with sunglasses",
-	"Unravel this, wizard",
-	"100% developer tears",
-	"Should’ve gone outside",
-	"Obfuscation sponsored by chaos",
-	"You're gonna hate this",
-	"Built different (and broken)",
-	"Insert smart quote here",
-	"Still better than Minified JS",
-	"Good luck, you’ll need it",
-	"Advanced trolling technology",
             random_(math.random(50,150)),
         }
         for i = 1, tonumber(number) do
@@ -172,8 +79,8 @@ function obfuscate(source, VarName, WaterMark)
         TableByte = random_(math.random(15,20)),
         Table_concat = random_(math.random(15,20)),
         Loadstring = random_(math.random(15,20)),
-        DummyFunc = random_(math.random(15,20)),
-        UnusedVar = random_(math.random(15,20)),
+        DummyFunc = random_(math.random(15,20)), -- variabel dummy tambahan
+        UnusedVar = random_(math.random(15,20)),   -- variabel yang tidak digunakan
     }
 
     local troll_func = "function() " .. add_binary(math.random(30,50), "") .. " end"
@@ -210,6 +117,8 @@ function obfuscate(source, VarName, WaterMark)
         end
         return table.concat(parts, " ")
     end
+
+    -- Bagian dummy tambahan untuk menambah noise (kode tidak terpakai)
     local dummy_code = ""
     for i = 1, math.random(3,6) do
         local dummyFunc = "local function " .. Variable .. random_(math.random(10,15)) .. "() " ..
@@ -226,18 +135,22 @@ function obfuscate(source, VarName, WaterMark)
                          dummy_code .. TableByte .. "; " ..
                          "local " .. Variable .. random_(math.random(15,20)) .. " = " .. func[1] .. "(" .. func[2] .. "); " ..
                          fake_code(math.random(2,4), math.random(math.floor(#source / 2), #source * 2))
+
+    -- Pengecekan jika panjang obfuscated lebih dari 1000 karakter, tulis ke file
     if #obfuscated > 1000 then
+        -- Menggunakan writefile (pastikan environment Anda mendukung fungsi ini)
         writefile("obfuscated_code.lua", obfuscated)
-        warn("Writen into file")
+        warn("Hasil obfuscation ditulis ke file: obfuscated_code.lua")
     else
-writefile("obfuscated_code.lua", obfuscated)
-        warn("Also Writen into your workspace.")
+        setclipboard(obfuscated)
+        warn("Hasil obfuscation disalin ke clipboard.")
     end
 
     warn("Done obfuscate in " .. tostring(tick() - ticks) .. " second")
     return
 end
 
+--// Module
 return function(source, CustomVarName, WaterMark)
     task.spawn(function()
         obfuscate(source, CustomVarName, WaterMark)
