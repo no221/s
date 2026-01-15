@@ -4,9 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Pause, ChevronRight, ChevronLeft, Clock } from "lucide-react";
 
-// ==========================================
-// 1. CONFIGURATION (DATA PERTANYAAN DISINI)
-// ==========================================
+
 const QUIZ_DATA = [
   {
     id: 1,
