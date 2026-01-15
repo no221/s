@@ -15,7 +15,7 @@ const QUIZ_DATA = [
       { label: "C", text: "Home Tool Markup Language" },
       { label: "D", text: "Hyper Tool Markup Level" },
     ],
-    correctAnswer: "A", // Opsional, utk validasi jika perlu nnti
+    correctAnswer: "A", // Opsional, utk validasi jika pelu nnti
   },
   {
     id: 2,
